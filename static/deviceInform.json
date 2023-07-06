@@ -2,6 +2,6 @@
   "deviceId": "Speaker8",
   "devType": "Speaker",
   "stat": "on",
-  "positions": [],
+  "position": [],
   "ip": ""
 }

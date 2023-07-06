@@ -2,6 +2,7 @@ from paho.mqtt import client as mqtt_client
 import multiprocessing
 import json
 import os
+import numpy as np
 from utils.utils import *
 
 
@@ -26,7 +27,7 @@ class MqtterProcess(multiprocessing.Process):
         while True:
             if self._flag.value and ~self.queue.empty():
                 data = self.queue.get()
-                self.client.publish('/client/showdata', data, 2)
+                self.client.publish('/client/{0}/{1}/start'.format(self.deviceInform['devType'], self.deviceInform['deviceId']), data, 2)
 
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
@@ -46,6 +47,8 @@ class MqtterProcess(multiprocessing.Process):
             print("Received message, topic:" + msg.topic + ' and payload:' + str(msg.payload))
             msg_topic = msg.topic
             msg_payload = json.loads(msg.payload)
+            if msg_topic.endswith('/deviceInform'):
+                self._res_inform(client, userdata, msg)
             if msg_topic.endswith('/reboot'):
                 self._res_reboot(client, userdata, msg)
             if msg_topic.endswith('/update'):
@@ -56,14 +59,13 @@ class MqtterProcess(multiprocessing.Process):
             if msg_topic.endswith('/remove'):
                 # 预留接口
                 pass
-            if msg_topic.endswith('/showdata'):
+            if msg_topic.endswith('/start'):
                 if self._flag.value:
                     self._stop()
                 self._start()
             if msg_topic.endswith('/stop'):
                 if self._flag.value:
                     self._stop()
-
         client = mqtt_client.Client()
         # # 设置账号密码（如果需要的话）
         # client.username_pw_set('username', 'password')
@@ -73,7 +75,7 @@ class MqtterProcess(multiprocessing.Process):
             'message': 'Device offline',
             'data': self._parse_inform()
         })
-        # client.will_set(self.topic, payload=msg)
+        # client.will_set('/client/offline', payload=msg)
         client.connect(self.broker, self.port, self.keepalive)
         client.on_message = on_message
         client.subscribe('/broker/request/#')
@@ -87,14 +89,14 @@ class MqtterProcess(multiprocessing.Process):
         self.client.publish(topic, payload=msg)
 
     def _parse_inform(self):
-        inform = json.dumps({
+        inform = {
             'deviceId': self.deviceInform['deviceId'],
             'devType': self.deviceInform['devType'],
             'stat': self.deviceInform['stat'],
             'params': self.params,
             'position': self.deviceInform['position'],
             'ip': self.deviceInform['ip']
-        })
+        }
         return inform
 
     # _res_showdata()
@@ -104,9 +106,19 @@ class MqtterProcess(multiprocessing.Process):
     def _stop(self):
         self._flag.value = False
 
+    def _res_inform(self, client, userdata, msg):
+        inform = json.dumps({
+            'timestamp': '',
+            'message': 'Device online',
+            'data': self._parse_inform()
+        })
+        self.publish('/client/online', inform)
+
     def _res_update(self, client, userdata, msg):
         inform = json.dumps({'message': 'Acoustic8 received the request for changing params'})
         params = json.loads(msg.payload)['data']
+        # 更新参数并写入配置文件
+        self.params = params
         with open("./static/config.json", "w") as f:
             json.dump(params, f)
         self.client.publish(self.selfTopic + "/update", payload=inform)
@@ -120,5 +132,5 @@ class MqtterProcess(multiprocessing.Process):
             'message': 'Device offline',
             'data': self._parse_inform()
         })
-        client.publish('/client/offline', inform)
+        client.publish('/client/offline', payload=inform)
         os.system("sudo reboot")
