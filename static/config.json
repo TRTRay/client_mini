@@ -1,1 +1,1 @@
-{"signal": {"chirp": {"startFrequency": 48000, "bandWidth": 4000, "chirpT": 0.04}, "Tchirp": {"startFrequency": 18000, "bandWidth": 4000, "chirpT": 0.04}, "singleTone": {"frequency": "19000"}}, "sampleRate": 48000, "playerIndex": 1, "recorderIndex": 1, "recorderChannals": 1}
+{"signal": {"chirp": {"startFrequency": 18000, "bandWidth": 4000, "chirpT": 0.04}, "Tchirp": {"startFrequency": 18000, "bandWidth": 4000, "chirpT": 0.04}, "singleTone": {"frequency": 16000}}, "sampleRate": 48000, "playerIndex": 1, "recorderIndex": 1, "recorderChannals": 1}

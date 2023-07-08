@@ -41,6 +41,9 @@ class MqtterProcess(multiprocessing.Process):
                 print("Connection returned with result code:" + str(rc))
             else:
                 print("连接失败！")
+            client.subscribe('/broker/request/#')
+            client.subscribe(
+                '/broker/{0}/{1}/#'.format(self.deviceInform['devType'], self.deviceInform['deviceId']))
 
         def on_message(client, userdata, msg):
             print("Received message, topic:" + msg.topic + ' and payload:' + str(msg.payload))
@@ -78,8 +81,6 @@ class MqtterProcess(multiprocessing.Process):
         client.will_set('/client/offline', payload=msg)
         client.connect(self.broker, self.port, self.keepalive)
         client.on_message = on_message
-        client.subscribe('/broker/request/#')
-        client.subscribe('/broker/{0}/{1}/#'.format(self.deviceInform['devType'], self.deviceInform['deviceId']))
         return client
 
     def subscribe(self, topic):
