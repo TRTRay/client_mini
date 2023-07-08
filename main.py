@@ -5,8 +5,12 @@ from mqtter import MqtterProcess
 from player import PlayerProcess
 from recorder import RecorderProcess
 
-
-MQTT_HOST = '182.92.152.209'  # mqtt代理服务器地址
+# cloud server
+# MQTT_HOST = '182.92.152.209'
+# localhost
+# MQTT_HOST = '127.0.0.1'
+# localhost with hardware link
+MQTT_HOST = '192.168.0.190'
 MQTT_PORT = 1883
 
 # 按间距中的绿色按钮以运行脚本。

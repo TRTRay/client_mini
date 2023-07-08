@@ -26,7 +26,7 @@ class MqtterProcess(multiprocessing.Process):
         while True:
             if self._flag.value and ~self.queue.empty():
                 data = self.queue.get()
-                self.client.publish('/client/{0}/{1}/showdata'.format(self.deviceInform['devType'], self.deviceInform['deviceId']), data, 2)
+                self.client.publish('/client/{0}/{1}/showdata/wav'.format(self.deviceInform['devType'], self.deviceInform['deviceId']), data, 2)
 
     def connect_mqtt(self):
         def on_connect(client, userdata, flags, rc):
